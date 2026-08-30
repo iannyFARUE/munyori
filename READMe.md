@@ -26,8 +26,8 @@ You need accounts at four services. Three are free with no credit card. One need
 | Service            | Why                                                        | Cost                             | Credit card required? |
 | ------------------ | ---------------------------------------------------------- | -------------------------------- | --------------------- |
 | **OpenAI**         | LLM provider for the agent                                 | A few cents for the whole course | **Yes**               |
-| **Upstash Vector** | Vector store for RAG (lesson 8)                            | Free tier, very generous         | No                    |
-| **Braintrust**     | Eval platform (lessons 4+)                                 | Free tier                        | No                    |
+| **Upstash Vector** | Vector store for RAG                                       | Free tier, very generous         | No                    |
+| **Braintrust**     | Eval platform                                              | Free tier                        | No                    |
 | **Tavily**         | Web search API for the agent's `searchWeb` tool (lesson 7) | Free tier, 1000 searches/month   | No                    |
 
 #### OpenAI
