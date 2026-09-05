@@ -1,9 +1,9 @@
 import MarkdownRenderer from "./MarkdownRenderer";
-import type { Message } from "./types";
+import type { UIMessage } from "ai";
 import ToolStatus from "../streaming/ToolStatus";
 
 interface MessageBubbleProps {
-  message: Message;
+  message: UIMessage;
 }
 
 export default function MessageBubble({ message }: MessageBubbleProps) {

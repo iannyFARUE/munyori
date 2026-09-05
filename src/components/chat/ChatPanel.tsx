@@ -1,6 +1,5 @@
 import { useState } from "react";
 import MessageList from "./MessageList";
-import type { Message } from "./types";
 import type { UIMessage } from "ai";
 import "./chat.css";
 
