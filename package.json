@@ -10,7 +10,7 @@
     "docs": "vitepress dev lessons --port=5170",
     "docs:build": "vitepress build lessons",
     "agent": "node scripts/test-agent.mjs",
-    "eval": " dotenv -e .dev.vars tsx evals/run.ts"
+    "eval": "dotenv -e .dev.vars -- braintrust eval evals/diagram.eval.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.55",
