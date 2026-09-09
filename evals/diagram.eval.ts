@@ -7,9 +7,9 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { runAgent } from "../src/agent-core";
 import { buildMessages, type GoldenTestCase } from "./buildMessages";
 import { schemaScorer, type AgentOutput } from "./scorers/schema";
-// import { structureScorer } from "./scorers/structure";
-// import { preservationScorer } from "./scorers/preservation";
-// import { labelKeywordScorer } from "./scorers/labelKeyword";
+import { structureScorer } from "./scorers/structure";
+import { preservationScorer } from "./scorers/preservation";
+import { labelKeywordScorer } from "./scorers/labelKeyword";
 
 config({ path: ".dev.vars" });
 
@@ -37,8 +37,8 @@ Eval<GoldenTestCase, AgentOutput, GoldenTestCase>("Diagram Agent", {
 
   scores: [
     schemaScorer,
-    // structureScorer,
-    // preservationScorer,
-    // labelKeywordScorer,
+    structureScorer,
+    preservationScorer,
+    labelKeywordScorer,
   ],
 });
