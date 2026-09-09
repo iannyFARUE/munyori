@@ -6,6 +6,8 @@ import {
   type ModelMessage,
 } from "ai";
 import { tools } from "./tools";
+import { serializeCanvasState } from "./context/canvas-state";
+import type { ExcalidrawElement } from "./schemas";
 
 export const SYSTEM_PROMPT = `# Role
 
@@ -103,20 +105,32 @@ Call \`generateDiagram\` with one new rectangle \`rect_cache\` plus its label \`
 interface AgentArgs {
   model: LanguageModel;
   messages: ModelMessage[];
+  // Current canvas state. Gets serialized and appended to the system prompt
+  // so the model knows what already exists. Pass `[]` (or omit) for an empty
+  // canvas. The worker reads this from the latest user message's
+  // data-canvas-state part. The eval passes `testCase.seed?.elements`.
+  canvasState?: ExcalidrawElement[];
   system?: string;
   maxSteps?: number;
 }
 
+function buildSystemPrompt(
+  base: string,
+  canvasState: ExcalidrawElement[] | undefined,
+): string {
+  return `${base}\n\n# Current canvas state\n\n${serializeCanvasState(canvasState ?? [])}`;
+}
 // Streaming variant. Used by the worker for the live chat experience.
 export function streamAgent({
   model,
   messages,
   system = SYSTEM_PROMPT,
   maxSteps = 5,
+  canvasState,
 }: AgentArgs) {
   return streamText({
     model,
-    system,
+    system: buildSystemPrompt(system, canvasState),
     messages,
     tools,
     stopWhen: stepCountIs(maxSteps),

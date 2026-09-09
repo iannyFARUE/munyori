@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import Canvas from "./components/Canvas";
 import ChatPanel from "./components/chat/ChatPanel";
@@ -36,6 +36,26 @@ export default function App() {
   // useAgentChat manages the chat protocol on top of the agent connection.
   // It gives us the messages array, a sendMessage function, and a status.
   const { messages, sendMessage, status } = useAgentChat({ agent });
+
+  // Wrap sendMessage so every outgoing user message also carries a snapshot
+  // of the current canvas state in a data-canvas-state part. The worker
+  // reads this off the latest user message and serializes it into the
+  // system prompt. This is the lesson 6 transport for canvas awareness; a
+  // later lesson will replace it with a client side tool the agent can
+  // call directly when it actually needs the info.
+  const sendWithCanvas = useMemo(
+    () => (msg: { role: "user"; parts: { type: "text"; text: string }[] }) => {
+      const elements = excalidrawAPI?.getSceneElements() ?? [];
+      sendMessage({
+        ...msg,
+        parts: [
+          ...msg.parts,
+          { type: "data-canvas-state", data: { elements } } as never,
+        ],
+      });
+    },
+    [sendMessage, excalidrawAPI],
+  );
 
   // Watch messages for tool outputs and apply them to the canvas. We handle
   // both tools the agent has: generateDiagram (replace canvas) and
@@ -108,7 +128,7 @@ export default function App() {
       </div>
       <ChatPanel
         messages={messages}
-        sendMessage={sendMessage}
+        sendMessage={sendWithCanvas}
         status={status}
       />
     </div>
