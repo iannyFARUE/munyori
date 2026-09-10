@@ -112,6 +112,11 @@ interface AgentArgs {
   canvasState?: ExcalidrawElement[];
   system?: string;
   maxSteps?: number;
+  env?: {
+    TAVILY_API_KEY?: string;
+    UPSTASH_VECTOR_REST_URL?: string;
+    UPSTASH_VECTOR_REST_TOKEN?: string;
+  };
 }
 
 function buildSystemPrompt(
@@ -127,12 +132,13 @@ export function streamAgent({
   system = SYSTEM_PROMPT,
   maxSteps = 5,
   canvasState,
+  env = {},
 }: AgentArgs) {
   return streamText({
     model,
     system: buildSystemPrompt(system, canvasState),
     messages,
-    tools: buildTools(),
+    tools: buildTools(env),
     stopWhen: stepCountIs(maxSteps),
   });
 }
@@ -144,12 +150,13 @@ export async function runAgent({
   messages,
   system = SYSTEM_PROMPT,
   maxSteps = 5,
+  env = {},
 }: AgentArgs) {
   const result = await generateText({
     model,
     system,
     messages,
-    tools: buildTools(),
+    tools: buildTools(env),
     stopWhen: stepCountIs(maxSteps),
   });
   return {

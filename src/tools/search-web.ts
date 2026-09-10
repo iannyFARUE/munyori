@@ -1,24 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-// searchWeb calls the Tavily API for fresh information from the web. This is
-// the lesson 7 demonstration of "tool execute can call an external API."
-//
-// We don't use a Tavily SDK — just fetch. The model gives us a query, we
-// post it, we condense the response into the small shape the model actually
-// needs ({title, content, url}), and return it. Errors are caught and
-// returned as `{ error }` so the model can reason about the failure instead
-// of crashing the agent loop.
-//
-// Three reasons web search lives here vs context (lesson 6) vs RAG (lesson 8):
-// - Context: facts you ALWAYS want the model to see (system prompt, canvas
-//   state). Cheap, but bloats every request.
-// - Tools (this lesson): facts you fetch ON DEMAND when the model decides it
-//   needs them. The model controls the trigger.
-// - RAG (lesson 8): facts retrieved from YOUR OWN corpus via embeddings.
-//   Same on demand pattern, different data source.
-// Web search is the simplest version of "model decides to fetch external data."
-
 interface TavilyResult {
   title?: string;
   content?: string;
