@@ -77,6 +77,68 @@ export default function App() {
         });
         return;
       }
+
+      if (toolCall.toolName === "addElements") {
+        const { elements } = toolCall.input as {
+          elements: Record<string, unknown>[];
+        };
+        // Strip null fields before handing to convertToExcalidrawElements.
+        // Our nullable schema forces the model to send every field, but
+        // Excalidraw expects undefined (not null) for "use the default."
+        // Null `points`, `startBinding`, `endBinding` will crash the helper.
+        const cleaned = elements.map(stripNulls);
+        const newOnes = convertToExcalidrawElements(cleaned as never, {
+          regenerateIds: false,
+        });
+        const next = [...api.getSceneElements(), ...newOnes];
+        api.updateScene({
+          elements: next,
+          captureUpdate: CaptureUpdateAction.IMMEDIATELY,
+        });
+        api.scrollToContent(next, { fitToContent: true });
+        addToolOutput({
+          toolCallId: toolCall.toolCallId,
+          output: { added: newOnes.length },
+        });
+        return;
+      }
+
+      if (toolCall.toolName === "updateElements") {
+        const { updates } = toolCall.input as {
+          updates: { id: string; fields: Record<string, unknown> }[];
+        };
+        const byId = new Map(updates.map((u) => [u.id, stripNulls(u.fields)]));
+        const next = api.getSceneElements().map((el) => {
+          const fields = byId.get(el.id);
+          return fields && Object.keys(fields).length > 0
+            ? newElementWith(el, fields as never)
+            : el;
+        });
+        api.updateScene({
+          elements: next,
+          captureUpdate: CaptureUpdateAction.IMMEDIATELY,
+        });
+        addToolOutput({
+          toolCallId: toolCall.toolCallId,
+          output: { updated: byId.size },
+        });
+        return;
+      }
+
+      if (toolCall.toolName === "removeElements") {
+        const { ids } = toolCall.input as { ids: string[] };
+        const remove = new Set(ids);
+        const next = api.getSceneElements().filter((el) => !remove.has(el.id));
+        api.updateScene({
+          elements: next,
+          captureUpdate: CaptureUpdateAction.IMMEDIATELY,
+        });
+        addToolOutput({
+          toolCallId: toolCall.toolCallId,
+          output: { removed: remove.size },
+        });
+        return;
+      }
     },
   });
 
@@ -107,7 +169,7 @@ export default function App() {
       </div>
       <ChatPanel
         messages={messages}
-        sendMessage={sendWithCanvas}
+        sendMessage={sendMessage}
         status={status}
       />
     </div>
