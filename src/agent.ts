@@ -5,6 +5,7 @@ import { streamAgent } from "./agent-core";
 import type { ExcalidrawElement } from "./schemas";
 interface Env {
   OPENAI_API_KEY: string;
+  TAVILY_API_KEY: string;
 }
 
 // Pull canvas state out of the user's just-arrived message. The client
@@ -38,7 +39,7 @@ export class DesignAgent extends AIChatAgent<Env> {
     const result = streamAgent({
       model,
       messages,
-      canvasState,
+      env: { TAVILY_API_KEY: this.env.TAVILY_API_KEY },
     });
 
     return result.toUIMessageStreamResponse();
