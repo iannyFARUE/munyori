@@ -19,16 +19,22 @@ import { serializeCanvasState } from "./context/canvas-state";
 // module level so React StrictMode's double mount doesn't change it.
 const sessionId = crypto.randomUUID();
 
-// Drop null valued fields. Our tool schemas use nullable rather than
-// optional so OpenAI strict mode stays on, which means the agent always
-// sends every field. Excalidraw expects undefined for "use the default,"
-// not null, and choking on `points: null` for a rectangle is a real bug.
-function stripNulls(obj: Record<string, unknown>): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(obj)) {
-    if (v !== null) out[k] = v;
+// Recursively drop null valued fields. Our tool schemas use nullable
+// rather than optional so OpenAI strict mode stays on, which means the
+// agent always sends every field. The Excalidraw skeleton helper expects
+// undefined for "use the default," not null, and chokes on `label: null`
+// or `start: null`. Recursion is required because nested objects (label,
+// start, end) also carry nullable fields like fontSize and textAlign.
+function stripNulls(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripNulls);
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (v !== null) out[k] = stripNulls(v);
+    }
+    return out;
   }
-  return out;
+  return value;
 }
 
 export default function App() {
